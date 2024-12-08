@@ -14,7 +14,7 @@ app.use(morgan("common"));
 app.use(helmet());
 app.use(cor());
 app.use(express.json());
-app.use(router.router);
+app.use(router);
 
 app.listen(PORT, () => {
   console.log(`server is running on port: ${PORT} `);

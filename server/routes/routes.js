@@ -7,7 +7,7 @@ const router = express.Router();
 
 const baseUrl = "api/v1";
 
-router.use(`/${baseUrl}/users`, userRoutes.router);
-router.use(`/${baseUrl}/auth`, authRouter.router);
+router.use(`/${baseUrl}/users`, userRoutes);
+router.use(`/${baseUrl}/auth`, authRouter);
 
-module.exports = { router };
+module.exports = router;

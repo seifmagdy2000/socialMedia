@@ -28,6 +28,14 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  description: {
+    type: String,
+    default: "",
+  },
+  description: {
+    type: String,
+    default: "",
+  },
 });
 const User = mongoose.model("User", userSchema);
 module.exports = User;

@@ -14,8 +14,6 @@ const updateUserInfoService = async (
     if (!user || !requester) {
       throw new Error("User not found");
     }
-    console.log(requester.isAdmin, requesterPassword, user.password);
-
     const isAuthorized =
       requester.isAdmin ||
       (await bcrypt.compare(requesterPassword, user.password));

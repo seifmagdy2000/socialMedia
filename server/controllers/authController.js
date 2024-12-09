@@ -15,7 +15,6 @@ const register = async (req, res) => {
       error: error,
       message: "registration error",
     });
-    console.log(error);
   }
 };
 
@@ -25,7 +24,7 @@ const login = async (req, res) => {
     const token = await loginUser(req, res);
     res.status(200).json({ message: "logged in successfully", token });
   } catch (error) {
-    console.error("Login error:", error.message);
+    throw new Error();
   }
 };
 

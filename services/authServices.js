@@ -17,7 +17,7 @@ const loginUser = async (req, res) => {
   const user = await userModel.findOne({ email });
 
   if (!user || !(await bcrypt.compare(password, user.password))) {
-    return res.status(401).json({ message: "Invalid credentials" });
+    throw new Error("invalid inputs");
   }
 
   // Create JWT

@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const userModel = require("../server/models/user.model");
-
+const authorizeAction = require("../util/authorizeAction");
+// Update User Info
 const updateUserInfoService = async (
   userID,
   updateData,
@@ -8,22 +9,10 @@ const updateUserInfoService = async (
   requesterPassword
 ) => {
   try {
-    const user = await userModel.findById(userID);
-    const requester = await userModel.findById(requesterID);
-
-    if (!user || !requester) {
-      throw new Error("User not found");
-    }
-    const isAuthorized =
-      requester.isAdmin ||
-      (await bcrypt.compare(requesterPassword, user.password));
-
-    if (!isAuthorized) {
-      throw new Error("Unauthorized: Invalid password or not an admin");
-    }
+    await authorizeAction(userID, requesterID, requesterPassword);
 
     if (updateData.password) {
-      updateData.password = bcrypt.hashSync(updateData.password, 10);
+      updateData.password = await bcrypt.hash(updateData.password, 10);
     }
 
     const updatedUser = await userModel.findByIdAndUpdate(
@@ -34,24 +23,16 @@ const updateUserInfoService = async (
 
     return updatedUser;
   } catch (error) {
-    throw new Error(error.message);
+    console.error("Error updating user info:", error.message);
+    throw new Error("Unable to update user information.");
   }
 };
-const deleteUserService = async (userID, password) => {
+
+// Delete User
+const deleteUserService = async (userID, requesterID, requesterPassword) => {
   try {
-    const user = await userModel.findById(userID);
+    await authorizeAction(userID, requesterID, requesterPassword);
 
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    // Compare the provided password with the stored hashed password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      throw new Error("Invalid password");
-    }
-    // Delete the user
     const deletedUser = await userModel.findByIdAndDelete(userID);
 
     if (!deletedUser) {
@@ -60,15 +41,23 @@ const deleteUserService = async (userID, password) => {
 
     return deletedUser;
   } catch (error) {
-    throw new Error(error.message);
+    console.error("Error deleting user:", error.message);
+    throw new Error("Unable to delete user.");
   }
 };
+
+// Get User
 const getUserService = async (id) => {
-  const user = await userModel.findById(id);
-  if (!user) {
-    throw new Error("User not found");
+  try {
+    const user = await userModel.findById(id);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user;
+  } catch (error) {
+    console.error("Error fetching user:", error.message);
+    throw new Error("Unable to fetch user information.");
   }
-  return user;
 };
 
 module.exports = { updateUserInfoService, deleteUserService, getUserService };

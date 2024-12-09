@@ -32,7 +32,8 @@ const deleteUser = async (req, res) => {
   try {
     const deletedUser = await deleteUserService(
       req.params.id,
-      req.body.password
+      req.userId,
+      req.body.requesterPassword
     );
     const { password, ...data } = deletedUser._doc;
     res.status(200).json({ message: "User deleted sucessfully", userId: data });

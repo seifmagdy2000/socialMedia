@@ -7,7 +7,12 @@ const {
 // Update user info
 const updateUserinfo = async (req, res) => {
   try {
-    const user = await updateUserInfoService(req.params.id, req.body);
+    const user = await updateUserInfoService(
+      req.params.id,
+      req.body,
+      req.userId,
+      req.body.requesterPassword
+    );
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

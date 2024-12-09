@@ -1,23 +1,42 @@
 const bcrypt = require("bcrypt");
 const userModel = require("../server/models/user.model");
 
-const updateUserInfoService = async (userID, updateData) => {
-  if (updateData.password) {
-    try {
-      updateData.password = bcrypt.hashSync(updateData.password, 10);
-    } catch (error) {
-      throw new Error("Error hashing password");
-    }
-  }
+const updateUserInfoService = async (
+  userID,
+  updateData,
+  requesterID,
+  requesterPassword
+) => {
   try {
-    const user = await userModel.findByIdAndUpdate(
+    const user = await userModel.findById(userID);
+    const requester = await userModel.findById(requesterID);
+
+    if (!user || !requester) {
+      throw new Error("User not found");
+    }
+    console.log(requester.isAdmin, requesterPassword, user.password);
+
+    const isAuthorized =
+      requester.isAdmin ||
+      (await bcrypt.compare(requesterPassword, user.password));
+
+    if (!isAuthorized) {
+      throw new Error("Unauthorized: Invalid password or not an admin");
+    }
+
+    if (updateData.password) {
+      updateData.password = bcrypt.hashSync(updateData.password, 10);
+    }
+
+    const updatedUser = await userModel.findByIdAndUpdate(
       userID,
       { $set: updateData },
       { new: true }
     );
-    return user;
+
+    return updatedUser;
   } catch (error) {
-    throw new Error("Error updating user info");
+    throw new Error(error.message);
   }
 };
 const deleteUserService = async (userID, password) => {

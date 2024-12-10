@@ -36,9 +36,8 @@ const deleteUserService = async (userID, requesterID, requesterPassword) => {
     const deletedUser = await userModel.findByIdAndDelete(userID);
 
     if (!deletedUser) {
-      throw new Error("Error deleting user");
+      throw new Error("user not found");
     }
-
     return deletedUser;
   } catch (error) {
     console.error("Error deleting user:", error.message);

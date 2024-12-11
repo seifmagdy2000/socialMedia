@@ -51,22 +51,30 @@ const getUserService = async (id) => {
     const user = await userCheck(id);
     return user;
   } catch (error) {
-    console.error("Error fetching user:", error.message);
     throw new Error("Unable to fetch user information.");
   }
 };
 //Follow user
-const followUserService = async (userID, requesterID, requesterPassword) => {
+const followUserService = async (targetUserId, requesterId) => {
   try {
-    await authorizeAction(userID, requesterID, requesterPassword);
-    const followingUser = await userCheck(requesterID);
-    await followingUser.updateOne({ $push: { followers: req.body.userID } });
-    return user;
+    const targetUser = await userModel.findById(targetUserId);
+    const requester = await userModel.findById(requesterId);
+
+    if (!targetUser || !requester) {
+      throw new Error("User(s) not found");
+    }
+
+    // Prevent duplicate follow entries
+    await targetUser.updateOne({ $addToSet: { followers: requesterId } });
+    await requester.updateOne({ $addToSet: { following: targetUserId } });
+
+    return { message: "Follow operation successful" };
   } catch (error) {
-    console.error("Error following user:", error.message);
-    throw new Error("Unable to follow user.");
+    console.error("Error in followUserService:", error.message);
+    throw error;
   }
 };
+
 module.exports = {
   updateUserInfoService,
   deleteUserService,

@@ -12,6 +12,6 @@ const router = express.Router();
 router.put("/update/:id", authenticate, updateUserinfo);
 router.delete("/delete/:id", authenticate, deleteUser);
 router.get("/get/:id", getUser);
-router.put("/follow/:id", followUser);
+router.put("/follow/:id", authenticate, followUser);
 
 module.exports = router;

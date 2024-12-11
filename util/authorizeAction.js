@@ -1,9 +1,11 @@
 const bcrypt = require("bcrypt");
 const userModel = require("../server/models/user.model");
+const userCheck = require("./userCheck");
+userCheck;
 
 const authorizeAction = async (userID, requesterID, requesterPassword) => {
-  const user = await userModel.findById(userID);
-  const requester = await userModel.findById(requesterID);
+  const user = await userCheck(userID);
+  const requester = await userCheck(requesterID);
 
   if (!user || !requester) {
     throw new Error("User not found");

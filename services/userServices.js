@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const userModel = require("../server/models/user.model");
 const authorizeAction = require("../util/authorizeAction");
+const userCheck = require("../util/userCheck");
 // Update User Info
 const updateUserInfoService = async (
   userID,
@@ -34,7 +35,6 @@ const deleteUserService = async (userID, requesterID, requesterPassword) => {
     await authorizeAction(userID, requesterID, requesterPassword);
 
     const deletedUser = await userModel.findByIdAndDelete(userID);
-
     if (!deletedUser) {
       throw new Error("user not found");
     }
@@ -48,15 +48,28 @@ const deleteUserService = async (userID, requesterID, requesterPassword) => {
 // Get User
 const getUserService = async (id) => {
   try {
-    const user = await userModel.findById(id);
-    if (!user) {
-      throw new Error("User not found");
-    }
+    const user = await userCheck(id);
     return user;
   } catch (error) {
     console.error("Error fetching user:", error.message);
     throw new Error("Unable to fetch user information.");
   }
 };
-
-module.exports = { updateUserInfoService, deleteUserService, getUserService };
+//Follow user
+const followUserService = async (userID, requesterID, requesterPassword) => {
+  try {
+    await authorizeAction(userID, requesterID, requesterPassword);
+    const followingUser = await userCheck(requesterID);
+    await followingUser.updateOne({ $push: { followers: req.body.userID } });
+    return user;
+  } catch (error) {
+    console.error("Error following user:", error.message);
+    throw new Error("Unable to follow user.");
+  }
+};
+module.exports = {
+  updateUserInfoService,
+  deleteUserService,
+  getUserService,
+  followUserService,
+};

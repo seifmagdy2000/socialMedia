@@ -4,6 +4,7 @@ const {
   deleteUser,
   getUser,
   followUser,
+  unfollowUser,
 } = require("../controllers/userController");
 const authenticate = require("../../middleware/authMiddleware");
 
@@ -13,5 +14,5 @@ router.put("/update/:id", authenticate, updateUserinfo);
 router.delete("/delete/:id", authenticate, deleteUser);
 router.get("/get/:id", getUser);
 router.put("/follow/:id", authenticate, followUser);
-
+router.put("/unfollow/:id", authenticate, unfollowUser);
 module.exports = router;

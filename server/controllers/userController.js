@@ -3,6 +3,7 @@ const {
   deleteUserService,
   getUserService,
   followUserService,
+  unfollowUserService,
 } = require("../../services/userServices");
 
 // Update user info
@@ -88,5 +89,30 @@ const followUser = async (req, res) => {
       .json({ message: "Internal server error", error: error.message });
   }
 };
+// Follow user
+const unfollowUser = async (req, res) => {
+  try {
+    const targetUserId = req.params.id;
 
-module.exports = { updateUserinfo, deleteUser, getUser, followUser };
+    if (targetUserId === req.userId) {
+      return res.status(400).json({ message: "You cannot follow yourself" });
+    }
+
+    await unfollowUserService(targetUserId, req.userId);
+
+    res.status(200).json({ message: "User was unfollowed successfully" });
+  } catch (error) {
+    console.error("Error following user:", error.message);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
+
+module.exports = {
+  updateUserinfo,
+  deleteUser,
+  getUser,
+  followUser,
+  unfollowUser,
+};

@@ -68,7 +68,27 @@ const followUserService = async (targetUserId, requesterId) => {
     await targetUser.updateOne({ $addToSet: { followers: requesterId } });
     await requester.updateOne({ $addToSet: { following: targetUserId } });
 
-    return { message: "Follow operation successful" };
+    return { message: "Follow operation was successful" };
+  } catch (error) {
+    console.error("Error in followUserService:", error.message);
+    throw error;
+  }
+};
+//Unfollow user
+const unfollowUserService = async (targetUserId, requesterId) => {
+  try {
+    const targetUser = await userModel.findById(targetUserId);
+    const requester = await userModel.findById(requesterId);
+
+    if (!targetUser || !requester) {
+      throw new Error("User(s) not found");
+    }
+
+    // Prevent duplicate follow entries
+    await targetUser.updateOne({ $pull: { followers: requesterId } });
+    await requester.updateOne({ $pull: { following: targetUserId } });
+
+    return { message: "Unfollow operation was successful" };
   } catch (error) {
     console.error("Error in followUserService:", error.message);
     throw error;
@@ -80,4 +100,5 @@ module.exports = {
   deleteUserService,
   getUserService,
   followUserService,
+  unfollowUserService,
 };

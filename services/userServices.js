@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const userModel = require("../server/models/user.model");
 const authorizeAction = require("../util/authorizeAction");
 const userCheck = require("../util/userCheck");
+
 // Update User Info
 const updateUserInfoService = async (
   userID,
@@ -22,10 +23,15 @@ const updateUserInfoService = async (
       { new: true }
     );
 
+    if (!updatedUser) {
+      throw { status: 404, message: "User not found" };
+    }
+
     return updatedUser;
   } catch (error) {
-    console.error("Error updating user info:", error.message);
-    throw new Error("Unable to update user information.");
+    throw error.status
+      ? error
+      : { status: 500, message: "Failed to update user information" };
   }
 };
 
@@ -35,13 +41,16 @@ const deleteUserService = async (userID, requesterID, requesterPassword) => {
     await authorizeAction(userID, requesterID, requesterPassword);
 
     const deletedUser = await userModel.findByIdAndDelete(userID);
+
     if (!deletedUser) {
-      throw new Error("user not found");
+      throw { status: 404, message: "User not found" };
     }
+
     return deletedUser;
   } catch (error) {
-    console.error("Error deleting user:", error.message);
-    throw new Error("Unable to delete user.");
+    throw error.status
+      ? error
+      : { status: 500, message: "Failed to delete user" };
   }
 };
 
@@ -49,49 +58,58 @@ const deleteUserService = async (userID, requesterID, requesterPassword) => {
 const getUserService = async (id) => {
   try {
     const user = await userCheck(id);
+
+    if (!user) {
+      throw { status: 404, message: "User not found" };
+    }
+
     return user;
   } catch (error) {
-    throw new Error("Unable to fetch user information.");
+    throw error.status
+      ? error
+      : { status: 500, message: "Failed to fetch user information" };
   }
 };
-//Follow user
+
+// Follow User
 const followUserService = async (targetUserId, requesterId) => {
   try {
     const targetUser = await userModel.findById(targetUserId);
     const requester = await userModel.findById(requesterId);
 
     if (!targetUser || !requester) {
-      throw new Error("User(s) not found");
+      throw { status: 404, message: "User(s) not found" };
     }
 
-    // Prevent duplicate follow entries
     await targetUser.updateOne({ $addToSet: { followers: requesterId } });
     await requester.updateOne({ $addToSet: { following: targetUserId } });
 
     return { message: "Follow operation was successful" };
   } catch (error) {
-    console.error("Error in followUserService:", error.message);
-    throw error;
+    throw error.status
+      ? error
+      : { status: 500, message: "Failed to follow user" };
   }
 };
-//Unfollow user
+
+// Unfollow User
 const unfollowUserService = async (targetUserId, requesterId) => {
   try {
     const targetUser = await userModel.findById(targetUserId);
     const requester = await userModel.findById(requesterId);
 
     if (!targetUser || !requester) {
-      throw new Error("User(s) not found");
+      throw { status: 404, message: "User(s) not found" };
     }
 
-    // Prevent duplicate follow entries
     await targetUser.updateOne({ $pull: { followers: requesterId } });
     await requester.updateOne({ $pull: { following: targetUserId } });
 
     return { message: "Unfollow operation was successful" };
   } catch (error) {
-    console.error("Error in followUserService:", error.message);
-    throw error;
+    throw error.status
+      ? error
+      : { status: 500, message: "Failed to unfollow user" };
   }
 };
 

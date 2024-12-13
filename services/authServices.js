@@ -17,7 +17,7 @@ const loginUser = async (req, res) => {
   const user = await userModel.findOne({ email });
 
   if (!user || !(await bcrypt.compare(password, user.password))) {
-    throw new Error("invalid inputs");
+    throw { status: 401, message: "unauthorized" };
   }
 
   // Create JWT

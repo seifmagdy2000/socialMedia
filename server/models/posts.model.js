@@ -1,39 +1,50 @@
 const mongoose = require("mongoose");
 
-const postSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    min: 3,
+const postSchema = new mongoose.Schema(
+  {
+    userID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Reference to the User model
+      required: true,
+    },
+    description: {
+      type: String,
+      maxlength: 500, // Maximum length for the description
+    },
+    image: {
+      type: String,
+    },
+    likes: {
+      type: [String], // Array of user IDs
+      default: [],
+    },
+    comments: [
+      {
+        userID: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        text: {
+          type: String,
+          required: true,
+          maxlength: 300,
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    tags: {
+      type: [String],
+      default: [],
+    },
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  profilePicture: {
-    type: String,
-    default: "",
-  },
-  coverPicture: {
-    type: String,
-    default: "",
-  },
-  isAdmin: {
-    type: Boolean,
-    default: false,
-  },
-  description: {
-    type: String,
-    default: "",
-  },
-  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-  following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-});
-const User = mongoose.model("User", postSchema);
-module.exports = post;
+  {
+    timestamps: true, // Automatically add createdAt and updatedAt fields
+  }
+);
+
+const postModel = mongoose.model("Post", postSchema);
+module.exports = postModel;

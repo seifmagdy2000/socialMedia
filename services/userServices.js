@@ -11,8 +11,20 @@ const updateUserInfoService = async (
   requesterPassword
 ) => {
   try {
-    await authorizeAction(userID, requesterID, requesterPassword);
+    const isAdmin = await authorizeAction(
+      userID,
+      requesterID,
+      requesterPassword
+    );
+    console.log(typeof updateData.isAdmin, updateData.isAdmin); // Log type and value
+    console.log(typeof isAdmin, isAdmin);
 
+    if (updateData.isAdmin == "true" && isAdmin == false) {
+      throw {
+        status: 401,
+        message: "non-admin users can not grant themselves admin privilege",
+      };
+    }
     if (updateData.password) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
     }

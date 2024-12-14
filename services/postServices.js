@@ -4,8 +4,6 @@ const createPostService = async (body, userId) => {
   try {
     const { description, image, tags } = body;
 
-    console.log(userId, description);
-
     if (!userId || !description) {
       throw { status: 400, message: "Empty userId or description" };
     }
@@ -17,8 +15,6 @@ const createPostService = async (body, userId) => {
       tags: tags || [],
     });
 
-    console.log(newPost);
-
     await newPost.save();
 
     return newPost;
@@ -29,4 +25,38 @@ const createPostService = async (body, userId) => {
   }
 };
 
-module.exports = { createPostService };
+const updatePostService = async (body, userId, postId) => {
+  try {
+    if (!postId || !userId) {
+      throw { status: 400, message: "Invalid userId or postId" };
+    }
+    const post = await postModel.findById(postId);
+    if (String(post.userID) !== String(userId)) {
+      throw { status: 401, message: "only post creator can edit the post" };
+    }
+
+    const { description, image, tags } = body;
+
+    const updatedPost = await postModel.findByIdAndUpdate(
+      postId,
+      {
+        description,
+        image: image || null,
+        tags: tags || [],
+      },
+      { new: true }
+    );
+
+    if (!updatedPost) {
+      throw { status: 404, message: "Post not found" };
+    }
+
+    return updatedPost;
+  } catch (error) {
+    throw error.status
+      ? error
+      : { status: 500, message: "Failed to update post" };
+  }
+};
+
+module.exports = { createPostService, updatePostService };

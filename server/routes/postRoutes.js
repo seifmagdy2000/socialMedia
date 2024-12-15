@@ -5,6 +5,7 @@ const {
   deletePost,
   likePost,
   unlikePost,
+  getPost,
 } = require("../controllers/postController");
 const authenticate = require("../../middleware/authMiddleware");
 
@@ -19,5 +20,7 @@ router.delete("/delete/:Id", authenticate, deletePost);
 router.put("/like/:Id", authenticate, likePost);
 
 router.put("/unlike/:Id", authenticate, unlikePost);
+
+router.get("/get/:Id", getPost);
 
 module.exports = router;

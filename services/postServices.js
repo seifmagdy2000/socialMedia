@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const postModel = require("../server/models/posts.model");
 
 const createPostService = async (body, userId) => {
@@ -136,10 +137,34 @@ const unlikePostService = async (userId, postId) => {
   }
 };
 
+const getPostService = async (postId) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      throw { status: 400, message: "Invalid postId format" };
+    }
+
+    const post = await postModel.findById(postId);
+
+    if (!post) {
+      throw { status: 404, message: "post not found" };
+    }
+
+    return post;
+  } catch (error) {
+    console.error("Error in getPostService:", error);
+    throw error.status
+      ? error
+      : {
+          status: 500,
+          message: "failed to fetch the post",
+        };
+  }
+};
 module.exports = {
   createPostService,
   updatePostService,
   deletePostService,
   likePostService,
   unlikePostService,
+  getPostService,
 };

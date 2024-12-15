@@ -5,6 +5,7 @@ const {
   deletePostService,
   likePostService,
   unlikePostService,
+  getPostService,
 } = require("../../services/postServices");
 
 const createPost = async (req, res) => {
@@ -84,5 +85,27 @@ const unlikePost = async (req, res) => {
     });
   }
 };
+const getPost = async (req, res) => {
+  try {
+    const post = await getPostService(req.params.Id);
 
-module.exports = { createPost, updatePost, deletePost, likePost, unlikePost };
+    res.status(200).json({
+      message: "post was fetched successfully",
+      post: post,
+    });
+  } catch (error) {
+    res.status(error.status || 500).json({
+      message: error.message || "error couldnt fetch the post",
+      error: error.stack || error,
+    });
+  }
+};
+
+module.exports = {
+  createPost,
+  updatePost,
+  deletePost,
+  likePost,
+  unlikePost,
+  getPost,
+};

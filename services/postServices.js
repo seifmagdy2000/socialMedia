@@ -84,4 +84,33 @@ const deletePostService = async (userId, postId) => {
       : { status: 500, message: "Failed to delete post" };
   }
 };
-module.exports = { createPostService, updatePostService, deletePostService };
+const likePostService = async (userId, postId) => {
+  try {
+    if (!postId || !userId) {
+      throw { status: 400, message: "Invalid userId or postId" };
+    }
+
+    const likedPost = await postModel.findOneAndUpdate(
+      { _id: postId },
+      { $addToSet: { likes: userId } },
+      { new: true }
+    );
+
+    if (!likedPost) {
+      throw { status: 404, message: "Post not found" };
+    }
+
+    return likedPost;
+  } catch (error) {
+    throw error.status
+      ? error
+      : { status: 500, message: "Failed to like post" };
+  }
+};
+
+module.exports = {
+  createPostService,
+  updatePostService,
+  deletePostService,
+  likePostService,
+};

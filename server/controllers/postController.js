@@ -3,6 +3,7 @@ const {
   createPostService,
   updatePostService,
   deletePostService,
+  likePostService,
 } = require("../../services/postServices");
 
 const createPost = async (req, res) => {
@@ -52,4 +53,20 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = { createPost, updatePost, deletePost };
+const likePost = async (req, res) => {
+  try {
+    const post = await likePostService(req.userId, req.params.Id);
+
+    res.status(200).json({
+      message: "post was successfully liked",
+      post: post,
+    });
+  } catch (error) {
+    res.status(error.status || 500).json({
+      message: error.message || "error couldnt like the post",
+      error: error.stack || error,
+    });
+  }
+};
+
+module.exports = { createPost, updatePost, deletePost, likePost };

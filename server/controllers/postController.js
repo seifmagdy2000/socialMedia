@@ -2,6 +2,7 @@ const authenticate = require("../../middleware/authMiddleware");
 const {
   createPostService,
   updatePostService,
+  deletePostService,
 } = require("../../services/postServices");
 
 const createPost = async (req, res) => {
@@ -22,8 +23,6 @@ const createPost = async (req, res) => {
 
 const updatePost = async (req, res) => {
   try {
-    console.log(req.userId, req.params.Id);
-
     const post = await updatePostService(req.body, req.userId, req.params.Id);
 
     res.status(200).json({
@@ -37,5 +36,20 @@ const updatePost = async (req, res) => {
     });
   }
 };
+const deletePost = async (req, res) => {
+  try {
+    const post = await deletePostService(req.userId, req.params.Id);
 
-module.exports = { createPost, updatePost };
+    res.status(200).json({
+      message: "Post was deleted successfully",
+      post: post,
+    });
+  } catch (error) {
+    res.status(error.status || 500).json({
+      message: error.message || "Post deleting error",
+      error: error.stack || error,
+    });
+  }
+};
+
+module.exports = { createPost, updatePost, deletePost };

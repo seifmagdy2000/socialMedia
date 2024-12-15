@@ -58,5 +58,30 @@ const updatePostService = async (body, userId, postId) => {
       : { status: 500, message: "Failed to update post" };
   }
 };
+const deletePostService = async (userId, postId) => {
+  try {
+    if (!postId || !userId) {
+      throw { status: 400, message: "Invalid userId or postId" };
+    }
+    console.log(postId, userId);
 
-module.exports = { createPostService, updatePostService };
+    const post = await postModel.findById(postId);
+    if (String(post.userID) !== String(userId)) {
+      throw { status: 401, message: "only post creator can delete the post" };
+    }
+
+    const deletedPost = await postModel.findByIdAndDelete(postId);
+    console.log(deletedPost);
+
+    if (!deletedPost) {
+      throw { status: 404, message: "Post not found" };
+    }
+
+    return deletedPost;
+  } catch (error) {
+    throw error.status
+      ? error
+      : { status: 500, message: "Failed to delete post" };
+  }
+};
+module.exports = { createPostService, updatePostService, deletePostService };

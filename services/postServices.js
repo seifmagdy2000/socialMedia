@@ -89,22 +89,50 @@ const likePostService = async (userId, postId) => {
     if (!postId || !userId) {
       throw { status: 400, message: "Invalid userId or postId" };
     }
-
-    const likedPost = await postModel.findOneAndUpdate(
+    const post = await postModel.findById(postId);
+    if (!post) {
+      throw { status: 404, message: "Post not found" };
+    }
+    if (post.likes.includes(userId)) {
+      throw { status: 400, message: "Post is already liked by the user" };
+    }
+    const updatedPost = await postModel.findOneAndUpdate(
       { _id: postId },
       { $addToSet: { likes: userId } },
       { new: true }
     );
 
-    if (!likedPost) {
-      throw { status: 404, message: "Post not found" };
-    }
-
-    return likedPost;
+    return updatedPost;
   } catch (error) {
     throw error.status
       ? error
       : { status: 500, message: "Failed to like post" };
+  }
+};
+
+const unlikePostService = async (userId, postId) => {
+  try {
+    if (!postId || !userId) {
+      throw { status: 400, message: "Invalid userId or postId" };
+    }
+    const post = await postModel.findById(postId);
+    if (!post) {
+      throw { status: 404, message: "Post not found" };
+    }
+    if (!post.likes.includes(userId)) {
+      throw { status: 400, message: "Post is not liked by the user" };
+    }
+    const updatedPost = await postModel.findOneAndUpdate(
+      { _id: postId },
+      { $pull: { likes: userId } },
+      { new: true }
+    );
+
+    return updatedPost;
+  } catch (error) {
+    throw error.status
+      ? error
+      : { status: 500, message: "Failed to unlike post" };
   }
 };
 
@@ -113,4 +141,5 @@ module.exports = {
   updatePostService,
   deletePostService,
   likePostService,
+  unlikePostService,
 };

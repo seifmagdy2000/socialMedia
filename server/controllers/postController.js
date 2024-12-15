@@ -4,6 +4,7 @@ const {
   updatePostService,
   deletePostService,
   likePostService,
+  unlikePostService,
 } = require("../../services/postServices");
 
 const createPost = async (req, res) => {
@@ -68,5 +69,20 @@ const likePost = async (req, res) => {
     });
   }
 };
+const unlikePost = async (req, res) => {
+  try {
+    const post = await unlikePostService(req.userId, req.params.Id);
 
-module.exports = { createPost, updatePost, deletePost, likePost };
+    res.status(200).json({
+      message: "post was successfully unliked",
+      post: post,
+    });
+  } catch (error) {
+    res.status(error.status || 500).json({
+      message: error.message || "error couldnt unlike the post",
+      error: error.stack || error,
+    });
+  }
+};
+
+module.exports = { createPost, updatePost, deletePost, likePost, unlikePost };

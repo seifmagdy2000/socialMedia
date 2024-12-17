@@ -1,4 +1,3 @@
-const authenticate = require("../../middleware/authMiddleware");
 const {
   createPostService,
   updatePostService,
@@ -6,6 +5,7 @@ const {
   likePostService,
   unlikePostService,
   getPostService,
+  getTimelinePostsService,
 } = require("../../services/postServices");
 
 const createPost = async (req, res) => {
@@ -100,6 +100,25 @@ const getPost = async (req, res) => {
     });
   }
 };
+const getTimelinePosts = async (req, res) => {
+  try {
+    const { page = 0, pageSize = 10 } = req.query;
+    const posts = await getTimelinePostsService(
+      req.userId,
+      parseInt(page),
+      parseInt(pageSize)
+    );
+
+    res.status(200).json({
+      message: "Timeline posts fetched successfully",
+      posts,
+    });
+  } catch (error) {
+    res.status(error.status || 500).json({
+      message: error.message || "Error fetching timeline posts",
+    });
+  }
+};
 
 module.exports = {
   createPost,
@@ -108,4 +127,5 @@ module.exports = {
   likePost,
   unlikePost,
   getPost,
+  getTimelinePosts,
 };

@@ -1,6 +1,6 @@
 const { default: mongoose } = require("mongoose");
 const postModel = require("../server/models/posts.model");
-
+const userModel = require("../server/models/user.model");
 const createPostService = async (body, userId) => {
   try {
     const { description, image, tags } = body;
@@ -160,6 +160,32 @@ const getPostService = async (postId) => {
         };
   }
 };
+const getTimelinePostsService = async (userId, page = 0, pageSize = 10) => {
+  try {
+    // Fetch the user and validate
+    const user = await userModel.findById(userId);
+    if (!user) {
+      throw { status: 404, message: "User not found" };
+    }
+
+    // Fetch posts from friends and self
+    const following = user.following; // Friends' IDs
+    const timelinePosts = await postModel
+      .find({ userID: { $in: [...following, userId] } }) // Include self and friends
+      .sort({ createdAt: -1 }) // Sort by recent
+      .skip(page * pageSize) // Pagination
+      .limit(pageSize)
+      .populate("userID", "username profilePicture"); // Fetch user details
+
+    return timelinePosts;
+  } catch (error) {
+    console.error("Error in getTimelinePostsService:", error);
+    throw error.status
+      ? error
+      : { status: 500, message: "Failed to fetch timeline posts" };
+  }
+};
+
 module.exports = {
   createPostService,
   updatePostService,
@@ -167,4 +193,5 @@ module.exports = {
   likePostService,
   unlikePostService,
   getPostService,
+  getTimelinePostsService,
 };

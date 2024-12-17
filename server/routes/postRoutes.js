@@ -6,6 +6,7 @@ const {
   likePost,
   unlikePost,
   getPost,
+  getTimelinePosts,
 } = require("../controllers/postController");
 const authenticate = require("../../middleware/authMiddleware");
 
@@ -22,5 +23,7 @@ router.put("/like/:Id", authenticate, likePost);
 router.put("/unlike/:Id", authenticate, unlikePost);
 
 router.get("/get/:Id", getPost);
+
+router.get("/timeline/", authenticate, getTimelinePosts);
 
 module.exports = router;

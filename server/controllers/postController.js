@@ -7,9 +7,14 @@ const {
   getPostService,
   getTimelinePostsService,
 } = require("../../services/postServices");
+const { PostValidation } = require("../../util/validation");
 
 const createPost = async (req, res) => {
   try {
+    const { error } = PostValidation.validate(req.body);
+    if (error) {
+      throw { status: 400, message: error.details[0].message };
+    }
     const post = await createPostService(req.body, req.userId);
 
     res.status(201).json({
@@ -26,6 +31,10 @@ const createPost = async (req, res) => {
 
 const updatePost = async (req, res) => {
   try {
+    const { error } = PostValidation.validate(req.body);
+    if (error) {
+      throw { status: 400, message: error.details[0].message };
+    }
     const post = await updatePostService(req.body, req.userId, req.params.Id);
 
     res.status(200).json({
